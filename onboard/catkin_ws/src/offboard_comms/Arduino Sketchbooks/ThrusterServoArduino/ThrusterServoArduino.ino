@@ -23,29 +23,29 @@ MultiplexedBasicESC *thrusters[NUM_THRUSTERS];
 MultiplexedServo *servos[NUM_SERVO];
 MS5837 pressure_sensor;
 
-// reusing ESC library code
+// Reusing ESC library code
 void thruster_speeds_callback(const offboard_comms::ThrusterSpeeds &ts_msg){
-    //copy the contents of the speed message to the local array
+    // Copy the contents of the speed message to the local array
     memcpy(thruster_speeds, ts_msg.speeds, sizeof(thruster_speeds));
     last_cmd_ms_ts = millis();
 }
 
 void servo_control_callback(const offboard_comms::SetServo::Request &sc_req, offboard_comms::SetServo::Response &sc_res){
-    //copy the contents of the servo request to the local variables
+    // Copy the contents of the servo request to the local variables
     uint8_t pin = sc_req.num;
     uint16_t angle = sc_req.angle;
     if(pin >= NUM_SERVO || angle > 180){
-      sc_res.success = false;
-      return;
+        sc_res.success = false;
+        return;
     }
     servos[pin]->run(angle);
     sc_res.success = true;
 }
 
-//Message to use with the pressure sensor
+// Message to use with the pressure sensor
 sensor_msgs::FluidPressure pressure_msg;
 
-//Sets node handle to have 2 subscribers, 2 publishers, and 150 bytes for input and output buffer
+// Sets node handle to have 2 subscribers, 2 publishers, and 150 bytes for input and output buffer
 ros::NodeHandle_<ArduinoHardware,2,2,150,150> nh;  
 ros::Subscriber<offboard_comms::ThrusterSpeeds> ts_sub("/offboard/thruster_speeds", &thruster_speeds_callback);
 ros::ServiceServer<offboard_comms::SetServo::Request, offboard_comms::SetServo::Response> servo_service("/offboard/servo_angle", &servo_control_callback);
@@ -68,10 +68,10 @@ void setup(){
         servos[i]->initialise();
     }
     
-    //Wire.begin() occurs in pwm_multiplexer.begin()
+    // Wire.begin() occurs in pwm_multiplexer.begin()
     while(!pressure_sensor.init()){
-      nh.logerror("Failed to initialize pressure sensor.");
-      delay(2000);
+        nh.logerror("Failed to initialize pressure sensor.");
+        delay(2000);
     }
     pressure_sensor.setModel(MS5837::MS5837_30BA);
     
@@ -81,7 +81,7 @@ void setup(){
 }
 
 void loop(){
-    // check if last version of data has timed out, if so, reset the speeds
+    // Check if last version of data has timed out, if so, reset the speeds
     if (last_cmd_ms_ts + THRUSTER_TIMEOUT_MS < millis())
         memset(thruster_speeds, 0, sizeof(thruster_speeds));
     for (int i = 0; i < NUM_THRUSTERS; ++i){

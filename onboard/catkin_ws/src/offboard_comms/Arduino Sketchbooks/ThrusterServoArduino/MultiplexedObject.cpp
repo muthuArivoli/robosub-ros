@@ -11,7 +11,7 @@ MultiplexedObject::~MultiplexedObject(){
 }
 
 void MultiplexedObject::attach(int _num){
-    // make sure it isn't trying to run multiple pins
+    // Make sure it isn't trying to run multiple pins
     if(attached)
         detach();
     attached = true;
